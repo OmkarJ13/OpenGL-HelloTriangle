@@ -27,16 +27,16 @@ static ShaderProgramCode ParseShader(const char* filePath)
 	}
 	
 	fseek(f, 0, SEEK_END);
-	size_t len = ftell(f);
+	const size_t len = ftell(f);
 	fseek(f, 0, SEEK_SET);
 
-	char* buffer = (char*)alloca(len);
+	char* buffer = static_cast<char*>(alloca(len));
 	*buffer = NULL;
 
-	char* vertexSrc = (char*)alloca(len);
+	char* vertexSrc = static_cast<char*>(alloca(len));
 	*vertexSrc = NULL;
 
-	char* fragmentSrc = (char*)alloca(len);
+	char* fragmentSrc = static_cast<char*>(alloca(len));
 	*fragmentSrc = NULL;
 
 	enum class ShaderType {
@@ -74,7 +74,7 @@ static ShaderProgramCode ParseShader(const char* filePath)
 
 static uint32_t CompileShader(uint32_t type, const std::string& source)
 {
-	uint32_t shader = glCreateShader(type);
+	const uint32_t shader = glCreateShader(type);
 	const char* src = source.c_str();
 	glShaderSource(shader, 1, &src, nullptr);
 	glCompileShader(shader);
@@ -87,7 +87,7 @@ static uint32_t CompileShader(uint32_t type, const std::string& source)
 		int length;
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
 
-		char* errorLog = (char*)alloca(length * sizeof(char));
+		char* errorLog = static_cast<char*>(alloca(length * sizeof(char)));
 		glGetShaderInfoLog(shader, length, &length, errorLog);
 
 		std::cout << "Failed to compile shaders!" << std::endl;
@@ -102,10 +102,10 @@ static uint32_t CompileShader(uint32_t type, const std::string& source)
 
 static uint32_t CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
-	uint32_t shaderProgram = glCreateProgram();
-	
-	uint32_t vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-	uint32_t fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
+	const uint32_t shaderProgram = glCreateProgram();
+
+	const uint32_t vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
+	const uint32_t fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
 	glAttachShader(shaderProgram, vs);
 	glAttachShader(shaderProgram, fs);
@@ -120,7 +120,7 @@ static uint32_t CreateShader(const std::string& vertexShader, const std::string&
 		int length;
 		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &length);
 
-		char* errorLog = (char*)alloca(length * sizeof(char));
+		char* errorLog = static_cast<char*>(alloca(length * sizeof(char)));
 		glGetProgramInfoLog(shaderProgram, length, &length, errorLog);
 
 		std::cout << "Failed to link program!" << std::endl;
@@ -138,7 +138,7 @@ static uint32_t CreateShader(const std::string& vertexShader, const std::string&
 		int length;
 		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &length);
 
-		char* errorLog = (char*)alloca(length * sizeof(char));
+		char* errorLog = static_cast<char*>(alloca(length * sizeof(char)));
 		glGetProgramInfoLog(shaderProgram, length, &length, errorLog);
 
 		std::cout << "Failed to validate program!" << std::endl;
@@ -164,7 +164,7 @@ int main()
 {
 	if (!glfwInit())
 	{
-		std::cout << "GLFW initialisation failed!" << std::endl;
+		std::cout << "GLFW initialization failed!" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
@@ -181,7 +181,7 @@ int main()
 
 	if (glewInit() != GLEW_OK)
 	{
-		std::cout << "GLEW initialisation failed!" << std::endl;
+		std::cout << "GLEW initialization failed!" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
@@ -208,23 +208,22 @@ int main()
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6, positions, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, static_cast<void*>(nullptr));
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, colours, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, static_cast<void*>(nullptr));
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
 
-	ShaderProgramCode code;
-	code = ParseShader("../HelloTriangle/res/shaders/Base.shader");
+	const ShaderProgramCode code = ParseShader("../HelloTriangle/res/shaders/Base.shader");
 
-	uint32_t shaderProgram = CreateShader(code.VertexCode, code.FragmentCode);
-	uint32_t uniformModel = glGetUniformLocation(shaderProgram, "model");
+	const uint32_t shaderProgram = CreateShader(code.VertexCode, code.FragmentCode);
+	const uint32_t uniformModel = glGetUniformLocation(shaderProgram, "model");
 
 	glfwSwapInterval(1);
 	glClearColor(0.02f, 0.02f, 0.02f, 1.0f);
